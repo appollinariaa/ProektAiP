@@ -16,13 +16,13 @@ class Proekt(sprite.Sprite):
 class Caracters(Proekt):
     def smena(self):
         keys = key.get_pressed()
-        if keys[K_LEFT]:
+        if keys[K_LEFT] or keys[K_a]:
             self.rect.x = self.rect.x - self.speed
-        if keys[K_RIGHT]:
+        if keys[K_RIGHT] or keys[K_d]:
             self.rect.x = self.rect.x + self.speed
-        if keys[K_UP]:
+        if keys[K_UP] or keys[K_w]:
             self.rect.y = self.rect.y - self.speed
-        if keys[K_DOWN]:
+        if keys[K_DOWN] or keys[K_s]:
             self.rect.y = self.rect.y + self.speed
 class Eneny(Proekt):
     side = "left"
@@ -73,15 +73,15 @@ class Door(sprite.Sprite):
 
 window = display.set_mode((810, 800))
 display.set_caption("Лабиринт")
-background = image.load("фон1.jpg")
+background = image.load("static/фон1.jpg")
 background = transform.scale(background, (810, 800))
-geroy = Caracters(15, 500, 15, "geroy.png")
-zvezda1 = Proekt(15, 90, 0, "zvezda.png")
-zvezda2 = Proekt(740, 15, 0, "zvezda.png")
-zvezda3 = Proekt(420, 400, 0, "zvezda.png")
-vrag1 = Eneny(0, 70, 20, "vrag.png")
-vrag2 = Eneny(100, 650, 15, "vrag.png")
-vrag3 = Eneny(750, 0, 15, "vrag.png")
+geroy = Caracters(15, 500, 15, "static/geroy.png")
+zvezda1 = Proekt(15, 90, 0, "static/zvezda.png")
+zvezda2 = Proekt(740, 15, 0, "static/zvezda.png")
+zvezda3 = Proekt(420, 400, 0, "static/zvezda.png")
+vrag1 = Eneny(0, 70, 20, "static/vrag.png")
+vrag2 = Eneny(100, 650, 15, "static/vrag.png")
+vrag3 = Eneny(750, 0, 15, "static/vrag.png")
 lage = Wall(0, 0, 800, 10, 100, 0,235 )
 lage2 = Wall(0, 0, 10, 800, 100, 0, 235)
 lage3 = Wall(800, 0, 130, 10, 100, 0, 235)
@@ -154,21 +154,21 @@ while run:
         if e.type == QUIT:
             run = False
     if sprite.collide_rect(geroy, vrag1):
-        background1 = image.load("game_over.png")
+        background1 = image.load("static/game_over.png")
         background1 = transform.scale(background1, (810, 800))
         window.blit(background1, (0, 0))
         display.update()
         time.delay(1000)
         run = False
     if sprite.collide_rect(geroy, vrag2):
-        background1 = image.load("game_over.png")
+        background1 = image.load("static/game_over.png")
         background1 = transform.scale(background1, (810, 800))
         window.blit(background1, (0, 0))
         display.update()
         time.delay(1000)
         run = False
     if sprite.collide_rect(geroy, vrag3):
-        background1 = image.load("game_over.png")
+        background1 = image.load("static/game_over.png")
         background1 = transform.scale(background1, (810, 800))
         window.blit(background1, (0, 0))
         display.update()
@@ -178,7 +178,7 @@ while run:
         all_collected = True
         door_open = True
     if door_open and sprite.collide_rect(geroy, door_rect):
-        background1 = image.load("win.jpg")
+        background1 = image.load("static/win.jpg")
         background1 = transform.scale(background1, (810, 800))
         window.blit(background1, (0, 0))
         display.update()
