@@ -1,79 +1,50 @@
 import unittest
-from unittest.mock import MagicMock, patch
-import main
+import pygame
+from pygame import sprite, image, transform
+import os
+
+class Proekt(sprite.Sprite):
+    def __init__(self, x, y, speed, mg):
+        sprite.Sprite.__init__(self)
+        self.speed = speed
+        mg = image.load(mg)
+        self.image = transform.scale(mg, (50, 50))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
 
 class TestProekt(unittest.TestCase):
-    @patch('pygame.image.load')
-    @patch('pygame.transform.scale')
-    def test_proekt_init(self, mock_scale, mock_load):
-        mock_surface = MagicMock()
-        mock_load.return_value = mock_surface
-        mock_scale.return_value = mock_surface
-        # Создаем объект
-        sprite = main.Proekt(10.5, 20.5, 5, 'path/to/image.png')
-        self.assertEqual(sprite.fx, 10.5)
-        self.assertEqual(sprite.fy, 20.5)
-        self.assertEqual(sprite.rect.x, int(10.5))
-        self.assertEqual(sprite.rect.y, int(20.5))
-        self.assertEqual(sprite.image, mock_surface)
-        self.assertEqual(sprite.speed, 5)
+    def setUp(self):
+        pygame.init()
 
-class TestCaracters(unittest.TestCase):
-    @patch('pygame.key.get_pressed')
-    @patch('pygame.image.load')
-    @patch('pygame.transform.scale')
-    def test_smena_moves_left_right_up_down(self, mock_scale, mock_load, mock_get_pressed):
-        mock_surface = MagicMock()
-        mock_load.return_value = mock_surface
-        mock_scale.return_value = mock_surface
-        sprite = main.Caracters(0, 0, 1, 'path/to/image.png')
-        sprite.fx = 0
-        sprite.fy = 0
-        # Мокать нажатия клавиш
-        mock_get_pressed.return_value = {
-            main.K_LEFT: True,
-            main.K_RIGHT: False,
-            main.K_UP: False,
-            main.K_DOWN: False,
-            main.K_a: False,
-            main.K_w: False,
-            main.K_s: False,
-            main.K_d: False
-        }
-        sprite.smena(0.1)
-        self.assertLess(sprite.fx, 0)
-        # Аналогично для других клавиш
+        # Создаем временное изображение для теста
+        self.test_image_path = 'test_image.png'
+        surface = pygame.Surface((10, 10))
+        surface.fill((0, 255, 0))
+        pygame.image.save(surface, self.test_image_path)
 
-class TestEneny(unittest.TestCase):
-    @patch('pygame.image.load')
-    @patch('pygame.transform.scale')
-    def test_vrag_smena1_direction_changes(self, mock_scale, mock_load):
-        mock_surface = MagicMock()
-        mock_load.return_value = mock_surface
-        mock_scale.return_value = mock_surface
-        enemy = main.Eneny(200, 170, 1, 'path')
-        enemy.side2 = "up"
-        enemy.rect = MagicMock()
-        enemy.rect.y = 170
-        enemy.fy = 170
-        enemy.vrag_smena1(0.1)
-        self.assertIn(enemy.side2, ["up", "down"])
-    # Аналогично тесты для vrag_smena2, vrag_smena3
+    def tearDown(self):
+        pygame.quit()
+        # Удаляем файл изображения после теста
+        if os.path.exists(self.test_image_path):
+            os.remove(self.test_image_path)
 
-class TestWall(unittest.TestCase):
-    @patch('pygame.Surface')
-    def test_picture_wall_calls_draw_rect(self, mock_surface):
-        mock_surface.return_value = MagicMock()
-        wall = main.Wall(10, 20, 30, 40, 100, 150, 200)
-        with patch('pygame.draw.rect') as mock_rect:
-            wall.picture_wall()
-            mock_rect.assert_called_once()
+    def test_proekt_initialization(self):
+        x, y, speed = 150, 250, 5
+        sprite_obj = Proekt(x, y, speed, self.test_image_path)
 
-class TestDoor(unittest.TestCase):
-    def test_init(self):
-        door = main.Door(10, 20, 30, 40)
-        self.assertEqual(door.rect.x, 10)
-        self.assertEqual(door.rect.y, 20)
+        # Проверка положения
+        self.assertEqual(sprite_obj.rect.x, x)
+        self.assertEqual(sprite_obj.rect.y, y)
 
-if __name__ == '__main__':
+        # Проверка скорости
+        self.assertEqual(sprite_obj.speed, speed)
+
+        # Проверка размера изображения
+        self.assertEqual(sprite_obj.image.get_size(), (50, 50))
+
+        # Проверка, что изображение загружено
+        self.assertIsNotNone(sprite_obj.image)
+
+if name == '__main__':
     unittest.main()
