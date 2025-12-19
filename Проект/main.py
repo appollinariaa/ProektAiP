@@ -230,9 +230,9 @@ class Door(sprite.Sprite):
         self.rect = Rect(x, y, self.width, self.height)
 window = display.set_mode((810, 800))
 display.set_caption("Лабиринт")
-background = image.load("фон1.jpg")
+background = image.load("static/фон1.jpg")
 background = transform.scale(background, (810, 800))
-welcome_image = image.load("Welcome.png")
+welcome_image = image.load("static/Welcome.png")
 welcome_image = transform.scale(welcome_image, (810, 800))
 window.blit(welcome_image, (0, 0))
 display.update()
@@ -245,13 +245,13 @@ while welcome:
         if e.type == KEYDOWN or e.type == MOUSEBUTTONDOWN:
             welcome = False
     time.delay(20)
-geroy = Caracters(START_X, START_Y, 15, "geroy.png")
-zvezda1 = Proekt(15, 90, 0, "zvezda.png")
-zvezda2 = Proekt(740, 15, 0, "zvezda.png")
-zvezda3 = Proekt(420, 400, 0, "zvezda.png")
-vrag1 = Eneny(92, 160, 15, "vrag.png")
-vrag2 = Eneny(20, 731, 15, "vrag.png")
-vrag3 = Eneny(740, 345, 15, "vrag.png")
+geroy = Caracters(START_X, START_Y, 15, "static/geroy.png")
+zvezda1 = Proekt(15, 90, 0, "static/zvezda.png")
+zvezda2 = Proekt(740, 15, 0, "static/zvezda.png")
+zvezda3 = Proekt(420, 400, 0, "static/zvezda.png")
+vrag1 = Eneny(92, 160, 15, "static/vrag.png")
+vrag2 = Eneny(20, 731, 15, "static/vrag.png")
+vrag3 = Eneny(740, 345, 15, "static/vrag.png")
 lage = Wall(0, 0, 800, 10, 100, 0,235 )
 lage2 = Wall(0, 0, 10, 800, 100, 0, 235)
 lage3 = Wall(800, 0, 130, 10, 100, 0, 235)
@@ -331,7 +331,7 @@ while run:
     elapsed = now - start_time
     remaining = GAME_TIME_MS - elapsed
     if remaining <= 0:
-        background1 = image.load("game_over.png")
+        background1 = image.load("static/game_over.png")
         background1 = transform.scale(background1, (810, 800))
         window.blit(background1, (0, 0))
         msg = font_obj.render("Время вышло!", True, (255, 0, 0))
@@ -342,7 +342,7 @@ while run:
     if len(stars) == 0:
         door_open = True
     if door_open and sprite.collide_rect(geroy, door_rect):
-        background1 = image.load("win.jpg")
+        background1 = image.load("static/win.jpg")
         background1 = transform.scale(background1, (810, 800))
         window.blit(background1, (0, 0))
         display.update()
@@ -417,7 +417,7 @@ while run:
         geroy.fx, geroy.fy = float(START_X), float(START_Y)
         geroy.sync_rect()
         if lives <= 0:
-            background1 = image.load("game_over.png")
+            background1 = image.load("static/game_over.png")
             background1 = transform.scale(background1, (810, 800))
             window.blit(background1, (0, 0))
             display.update()
