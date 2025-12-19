@@ -142,7 +142,7 @@ walls = [lage, lage2, lage3, lage4, lage5, lage6, lage7, lage8, lage9, lage10,
          lage51, lage52]
 stars = [zvezda1, zvezda2, zvezda3]
 vrags = [vrag1, vrag2, vrag3]
-font_obj = font.Font(None, 40)
+font_obj = font.Font(None, 50)
 score = 0
 all_collected = False
 door_rect = Door(800, 130, 100, 10)
