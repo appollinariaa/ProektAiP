@@ -1,52 +1,192 @@
 import pygame
 pygame.init()
 from pygame import *
+FPS = 60
+SPEED_FACTOR = 10
+GAME_TIME_MS = 2 * 60 * 1000
+HIT_COOLDOWN_MS = 600
+START_X, START_Y = 15, 500
 class Proekt(sprite.Sprite):
     def __init__(self, x, y, speed, mg):
+        """
+        Создаёт базовый игровой объект (спрайт) с картинкой, скоростью и позицией.
+        Объект хранит координаты двумя способами:
+        - ``fx``/``fy`` (float) — для плавного перемещения (можно прибавлять дробные значения).
+        - ``rect`` (pygame.Rect) — для отрисовки и столкновений (pygame работает с целыми).
+        :param x: Начальная координата X (левый верхний угол спрайта).
+        :type x: int | float
+        :param y: Начальная координата Y (левый верхний угол спрайта).
+        :type y: int | float
+        :param speed: Базовая скорость объекта (множится на ``SPEED_FACTOR`` и ``dt``).
+        :type speed: int | float
+        :param mg: Путь к файлу изображения объекта.
+        :type mg: str
+        :raises pygame.error: Если изображение не удаётся загрузить (не найден файл или неверный формат).
+        """
         sprite.Sprite.__init__(self)
         self.speed = speed
         mg = image.load(mg)
         self.image = transform.scale(mg, (50, 50))
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        self.fx = float(x)
+        self.fy = float(y)
+        self.rect.x = int(self.fx)
+        self.rect.y = int(self.fy)
     def see(self):
+        """
+        Отрисовывает спрайт на главном окне ``window``.
+        Использует текущие координаты ``self.rect.x`` и ``self.rect.y``.
+        Предполагается, что перед вызовом была выполнена синхронизация ``sync_rect()``
+        (если ``fx/fy`` менялись).
+        :returns: Ничего не возвращает.
+        :rtype: None
+        """
         window.blit(self.image,(self.rect.x, self.rect.y))
-
+    def sync_rect(self):
+        """
+        Синхронизирует ``pygame.Rect`` (целые координаты) с float-координатами ``fx/fy``.
+        Нужна для корректной отрисовки и столкновений после движения, выполненного
+        с использованием ``fx/fy``.
+        :returns: Ничего не возвращает.
+        :rtype: None
+        """
+        self.rect.x = int(round(self.fx))
+        self.rect.y = int(round(self.fy))
 class Caracters(Proekt):
-    def smena(self):
+    def smena(self, dt):
+        """
+        Обрабатывает управление игроком и перемещает персонажа.
+        Управление:
+        - влево: ``LEFT`` или ``A``
+        - вправо: ``RIGHT`` или ``D``
+        - вверх: ``UP`` или ``W``
+        - вниз: ``DOWN`` или ``S``
+        Перемещение делается во float-координатах через ``fx/fy`` и зависит от времени кадра:
+        ``step = self.speed * SPEED_FACTOR * dt``
+        :param dt: Время, прошедшее с прошлого кадра (в секундах).
+        :type dt: float
+        :returns: Ничего не возвращает.
+        :rtype: None
+        """
         keys = key.get_pressed()
+        step = self.speed * SPEED_FACTOR * dt
         if keys[K_LEFT] or keys[K_a]:
-            self.rect.x = self.rect.x - self.speed
+            self.fx -= step
         if keys[K_RIGHT] or keys[K_d]:
-            self.rect.x = self.rect.x + self.speed
+            self.fx += step
         if keys[K_UP] or keys[K_w]:
-            self.rect.y = self.rect.y - self.speed
+            self.fy -= step
         if keys[K_DOWN] or keys[K_s]:
-            self.rect.y = self.rect.y + self.speed
+            self.fy += step
+        self.sync_rect()
 class Eneny(Proekt):
     side = "left"
-    def smena(self):
-        if self.rect.x <= 0:
-            self.side = "right"
-        if self.rect.x >= 700:
-            self.side = "left"
-        if self.side == "left":
-            self.rect.x = self.rect.x - self.speed
-        else:
-            self.rect.x = self.rect.x + self.speed
-    side2 = "down"
-    def smena2(self):
-        if self.rect.y <= 30:
-             self.side2 = "down"
-        if self.rect.y >= 500:
+    def vrag_smena1(self, dt):
+        """
+        Движение врага №1: патрулирование по вертикали между заданными границами.
+        Логика:
+        - если враг поднялся до ``y <= 170`` → направление становится ``down``
+        - если опустился до ``y >= 420`` → направление становится ``up``
+        - затем двигается на шаг ``step`` вверх или вниз.
+        :param dt: Время, прошедшее с прошлого кадра (в секундах).
+        :type dt: float
+        :returns: Ничего не возвращает.
+        :rtype: None
+        """
+        step = self.speed * SPEED_FACTOR * dt
+        if self.rect.y <= 170:
+            self.side2 = "down"
+        if self.rect.y >= 420:
             self.side2 = "up"
         if self.side2 == "up":
-            self.rect.y = self.rect.y - self.speed
+            self.fy -= step
         else:
-            self.rect.y = self.rect.y + self.speed
-
+            self.fy += step
+        self.sync_rect()
+    side2 = "down"
+    def vrag_smena2(self, dt):
+        """
+        Движение врага №2: патрулирование по горизонтали между заданными границами.
+        Логика:
+        - если враг ушёл влево до ``x <= 20`` → направление становится ``right``
+        - если ушёл вправо до ``x >= 730`` → направление становится ``left``
+        - затем двигается на шаг ``step`` влево или вправо.
+        :param dt: Время, прошедшее с прошлого кадра (в секундах).
+        :type dt: float
+        :returns: Ничего не возвращает.
+        :rtype: None
+        """
+        step = self.speed * SPEED_FACTOR * dt
+        if self.rect.x <= 20:
+            self.side = "right"
+        if self.rect.x >= 730:
+            self.side = "left"
+        if self.side == "left":
+            self.fx -= step
+        else:
+            self.fx += step
+        self.sync_rect()
+    def vrag_smena3(self, dt):
+        """
+        Движение врага №3: движение по маршруту (список точек) туда-обратно.
+        При первом запуске метод инициализирует:
+        - ``self.route`` — список точек маршрута ``[(x1, y1), (x2, y2), ...]``
+        - ``self._route_i`` — индекс текущей целевой точки
+        - ``self._route_dir`` — направление изменения индекса (``+1`` вперёд, ``-1`` назад)
+        Затем каждый кадр враг перемещается от текущей позиции к целевой точке.
+        Если достиг точки — выбирает следующую (в конце маршрута разворачивается обратно).
+        Метод учитывает ``dt`` и использует float-координаты.
+        :param dt: Время, прошедшее с прошлого кадра (в секундах).
+        :type dt: float
+        :returns: Ничего не возвращает. Может завершиться досрочно, если скорость нулевая или маршрут слишком короткий.
+        :rtype: None
+        """
+        if not hasattr(self, "route"):
+            self.route = [(740, 345), (740, 95), (660, 95), (660, 160), (585, 160),(585, 95), (510, 95), (510, 15), (740, 15)]
+            self._route_i = 0
+            self._route_dir = 1
+            self.fx, self.fy = map(float, self.route[0])
+            self.sync_rect()
+            self._route_i = 1
+        if self.speed <= 0 or len(self.route) < 2:
+            return
+        step = self.speed * SPEED_FACTOR * dt
+        tx, ty = self.route[self._route_i]
+        tx, ty = float(tx), float(ty)
+        x, y = self.fx, self.fy
+        dx, dy = tx - x, ty - y
+        if dx == 0 and dy == 0:
+            if self._route_i == len(self.route) - 1:
+                self._route_dir = -1
+            elif self._route_i == 0:
+                self._route_dir = 1
+            self._route_i += self._route_dir
+            return
+        dist = (dx * dx + dy * dy) ** 0.5
+        move = min(step, dist)
+        self.fx = x + dx / dist * move
+        self.fy = y + dy / dist * move
+        self.sync_rect()
 class Wall(sprite.Sprite):
+    """
+    Создаёт прямоугольную стену (препятствие) заданного размера и цвета.
+    Стена хранит параметры цвета и размера, а также прямоугольник ``rect``
+    для отрисовки и столкновений.
+    :param x: Координата X (левый верхний угол стены).
+    :type x: int
+    :param y: Координата Y (левый верхний угол стены).
+    :type y: int
+    :param heig: Высота стены (в пикселях).
+    :type heig: int
+    :param wid: Ширина стены (в пикселях).
+    :type wid: int
+    :param r: Красная составляющая цвета (0..255).
+    :type r: int
+    :param g: Зелёная составляющая цвета (0..255).
+    :type g: int
+    :param b: Синяя составляющая цвета (0..255).
+    :type b: int
+    """ 
     def __init__(self, x, y, heig, wid, r, g, b):
         sprite.Sprite.__init__(self)
         self.r = r
@@ -60,9 +200,27 @@ class Wall(sprite.Sprite):
         self.rect = Rect(x, y, self.width, self.height)
 
     def picture_wall(self):
+        """
+        Отрисовывает стену на главном окне ``window`` в виде прямоугольника.
+        Использует сохранённые цвет (r, g, b) и параметры ``rect``/``width``/``height``.
+        :returns: Ничего не возвращает.
+        :rtype: None
+        """
         draw.rect(window, (self.r, self.g, self.b), (self.rect.x, self.rect.y, self.width, self.height))
-
 class Door(sprite.Sprite):
+    """
+    Создаёт прямоугольную "дверь" (зону выхода).
+    Дверь используется для проверки столкновения игрока с выходом:
+    ``sprite.collide_rect(geroy, door_rect)``.
+    :param x: Координата X (левый верхний угол двери).
+    :type x: int
+    :param y: Координата Y (левый верхний угол двери).
+    :type y: int
+    :param heig: Высота двери (в пикселях).
+    :type heig: int
+    :param wid: Ширина двери (в пикселях).
+    :type wid: int
+    """
     def __init__(self, x, y, heig, wid):
         sprite.Sprite.__init__(self)
         self.width = wid
@@ -70,18 +228,30 @@ class Door(sprite.Sprite):
         self.image = Surface([self.width, self.height])
         self.rect = self.image.get_rect()
         self.rect = Rect(x, y, self.width, self.height)
-
 window = display.set_mode((810, 800))
 display.set_caption("Лабиринт")
-background = image.load("static/фон1.jpg")
+background = image.load("фон1.jpg")
 background = transform.scale(background, (810, 800))
-geroy = Caracters(15, 500, 15, "static/geroy.png")
-zvezda1 = Proekt(15, 90, 0, "static/zvezda.png")
-zvezda2 = Proekt(740, 15, 0, "static/zvezda.png")
-zvezda3 = Proekt(420, 400, 0, "static/zvezda.png")
-vrag1 = Eneny(0, 70, 20, "static/vrag.png")
-vrag2 = Eneny(100, 650, 15, "static/vrag.png")
-vrag3 = Eneny(750, 0, 15, "static/vrag.png")
+welcome_image = image.load("Welcome.png")
+welcome_image = transform.scale(welcome_image, (810, 800))
+window.blit(welcome_image, (0, 0))
+display.update()
+welcome = True
+while welcome:
+    for e in event.get():
+        if e.type == QUIT:
+            pygame.quit()
+            exit()
+        if e.type == KEYDOWN or e.type == MOUSEBUTTONDOWN:
+            welcome = False
+    time.delay(20)
+geroy = Caracters(START_X, START_Y, 15, "geroy.png")
+zvezda1 = Proekt(15, 90, 0, "zvezda.png")
+zvezda2 = Proekt(740, 15, 0, "zvezda.png")
+zvezda3 = Proekt(420, 400, 0, "zvezda.png")
+vrag1 = Eneny(92, 160, 15, "vrag.png")
+vrag2 = Eneny(20, 731, 15, "vrag.png")
+vrag3 = Eneny(740, 345, 15, "vrag.png")
 lage = Wall(0, 0, 800, 10, 100, 0,235 )
 lage2 = Wall(0, 0, 10, 800, 100, 0, 235)
 lage3 = Wall(800, 0, 130, 10, 100, 0, 235)
@@ -147,43 +317,38 @@ score = 0
 all_collected = False
 door_rect = Door(800, 130, 100, 10)
 door_open = False
+lives = 3
+last_hit_time = -HIT_COOLDOWN_MS
+clock = time.Clock()
+start_time = time.get_ticks()
 run = True
 while run:
-    time.delay(100)
+    dt = clock.tick(FPS) / 1000.0
     for e in event.get():
         if e.type == QUIT:
             run = False
-    if sprite.collide_rect(geroy, vrag1):
-        background1 = image.load("static/game_over.png")
+    now = time.get_ticks()
+    elapsed = now - start_time
+    remaining = GAME_TIME_MS - elapsed
+    if remaining <= 0:
+        background1 = image.load("game_over.png")
         background1 = transform.scale(background1, (810, 800))
         window.blit(background1, (0, 0))
+        msg = font_obj.render("Время вышло!", True, (255, 0, 0))
+        window.blit(msg, (300, 20))
         display.update()
-        time.delay(1000)
-        run = False
-    if sprite.collide_rect(geroy, vrag2):
-        background1 = image.load("static/game_over.png")
-        background1 = transform.scale(background1, (810, 800))
-        window.blit(background1, (0, 0))
-        display.update()
-        time.delay(1000)
-        run = False
-    if sprite.collide_rect(geroy, vrag3):
-        background1 = image.load("static/game_over.png")
-        background1 = transform.scale(background1, (810, 800))
-        window.blit(background1, (0, 0))
-        display.update()
-        time.delay(1000)
-        run = False
+        time.delay(2000)
+        break
     if len(stars) == 0:
-        all_collected = True
         door_open = True
     if door_open and sprite.collide_rect(geroy, door_rect):
-        background1 = image.load("static/win.jpg")
+        background1 = image.load("win.jpg")
         background1 = transform.scale(background1, (810, 800))
         window.blit(background1, (0, 0))
         display.update()
         time.delay(3000)
-        run = False
+        break
+    window.blit(background, (0, 0))
     window.blit(background, (0, 0))
     lage.picture_wall()
     lage2.picture_wall()
@@ -237,16 +402,30 @@ while run:
     lage50.picture_wall()
     lage51.picture_wall()
     lage52.picture_wall()
-    old_x, old_y = geroy.rect.x, geroy.rect.y
-    geroy.smena()
+    old_fx, old_fy = geroy.fx, geroy.fy
+    geroy.smena(dt)
     if any(sprite.collide_rect(geroy, wall) for wall in walls):
-        geroy.rect.x, geroy.rect.y = old_x, old_y
+        geroy.fx, geroy.fy = old_fx, old_fy
+        geroy.sync_rect()
+    vrag1.vrag_smena1(dt)
+    vrag2.vrag_smena2(dt)
+    vrag3.vrag_smena3(dt)
+    hit_enemy = any(sprite.collide_rect(geroy, v) for v in vrags)
+    if hit_enemy and (now - last_hit_time) >= HIT_COOLDOWN_MS:
+        lives -= 1
+        last_hit_time = now
+        geroy.fx, geroy.fy = float(START_X), float(START_Y)
+        geroy.sync_rect()
+        if lives <= 0:
+            background1 = image.load("game_over.png")
+            background1 = transform.scale(background1, (810, 800))
+            window.blit(background1, (0, 0))
+            display.update()
+            time.delay(2000)
+            break
     geroy.see()
-    vrag1.smena()
     vrag1.see()
-    vrag2.smena()
     vrag2.see()
-    vrag3.smena2()
     vrag3.see()
     for star in stars:
         star.see()
@@ -256,12 +435,17 @@ while run:
             star.kill()
             score += 1
     score_text = font_obj.render(f"Звезд: {score}", True, (255, 0, 0))
+    lives_text = font_obj.render(f"Жизни: {lives}", True, (255, 0, 0))
+    sec = max(0, remaining // 1000)
+    mm = sec // 60
+    ss = sec % 60
+    timer_text = font_obj.render(f"Время: {mm:02d}:{ss:02d}", True, (255, 0, 0))
     window.blit(score_text, (10, 10))
-
+    window.blit(lives_text, (10, 45))
+    window.blit(timer_text, (10, 80))
     if not door_open:
-        draw.rect(window, (255, 0, 0), door_rect)
+        draw.rect(window, (255, 0, 0), door_rect.rect)
     else:
-        draw.rect(window, (255, 255, 255), door_rect)
+        draw.rect(window, (255, 255, 255), door_rect.rect)
     display.update()
-
-
+pygame.quit()
