@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock, patch
-import main  # Ваш файл с кодом
+import main
 
 class TestProekt(unittest.TestCase):
     @patch('pygame.image.load')
@@ -58,7 +58,6 @@ class TestEneny(unittest.TestCase):
         enemy.fy = 170
         enemy.vrag_smena1(0.1)
         self.assertIn(enemy.side2, ["up", "down"])
-
     # Аналогично тесты для vrag_smena2, vrag_smena3
 
 class TestWall(unittest.TestCase):
@@ -75,9 +74,6 @@ class TestDoor(unittest.TestCase):
         door = main.Door(10, 20, 30, 40)
         self.assertEqual(door.rect.x, 10)
         self.assertEqual(door.rect.y, 20)
-
-# Можно добавить тесты для логики столкновений, подсчета времени и т.п.,
-# мокая pygame.time.get_ticks, sprite.collide_rect и т.д.
 
 if __name__ == '__main__':
     unittest.main()
