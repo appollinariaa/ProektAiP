@@ -240,7 +240,6 @@ while run:
     old_x, old_y = geroy.rect.x, geroy.rect.y
     geroy.smena()
     if any(sprite.collide_rect(geroy, wall) for wall in walls):
-        # Если столкновение — возвращаемся назад
         geroy.rect.x, geroy.rect.y = old_x, old_y
     geroy.see()
     vrag1.smena()
@@ -251,20 +250,17 @@ while run:
     vrag3.see()
     for star in stars:
         star.see()
-    for star in stars[:]:  # копия списка для безопасного удаления
+    for star in stars[:]:
         if sprite.collide_rect(geroy, star):
             stars.remove(star)
             star.kill()
             score += 1
-        # Отрисовка подсчета
     score_text = font_obj.render(f"Звезд: {score}", True, (255, 0, 0))
     window.blit(score_text, (10, 10))
 
     if not door_open:
-        # закрытая дверь
         draw.rect(window, (255, 0, 0), door_rect)
     else:
-        # открытая дверь (можно сделать прозрачной или другого цвета)
         draw.rect(window, (255, 255, 255), door_rect)
     display.update()
 
