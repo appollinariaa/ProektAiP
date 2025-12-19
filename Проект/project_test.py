@@ -2,7 +2,7 @@ import unittest
 import pygame
 from pygame import *
 
-from main import Proekt, Caracters, Eneny, Wall, Door, window, background, geroy, vrag1, vrag2, vrag3, stars, walls, lage, lage2, lage3, lage4, lage5, lage6, lage7, lage8, lage9, lage10, lage11, lage12, lage13, lage14, lage15, lage16, lage17, lage18, lage19, lage20, lage21, lage22, lage23, lage24, lage25, lage26, lage27, lage28, lage29, lage30, lage31, lage32, lage33, lage34, lage35, lage36, lage37, lage38, lage39, lage40, lage41, lage42, lage43, lage44, lage45, lage46, lage47, lage48, lage49, lage50, lage51, lage52
+from pygame import Proekt, Caracters, Eneny, Wall, Door, window, background, geroy, vrag1, vrag2, vrag3, stars, walls, lage, lage2, lage3, lage4, lage5, lage6, lage7, lage8, lage9, lage10, lage11, lage12, lage13, lage14, lage15, lage16, lage17, lage18, lage19, lage20, lage21, lage22, lage23, lage24, lage25, lage26, lage27, lage28, lage29, lage30, lage31, lage32, lage33, lage34, lage35, lage36, lage37, lage38, lage39, lage40, lage41, lage42, lage43, lage44, lage45, lage46, lage47, lage48, lage49, lage50, lage51, lage52
 
 class TestGameLogic(unittest.TestCase):
 
