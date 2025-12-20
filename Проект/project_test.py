@@ -1,6 +1,6 @@
 import unittest  
 import pygame  
-from your_module import Proekt, Caracters, Eneny, Wall, Door  # Импортируйте ваш код
+from your_module import Proekt, Caracters, Eneny, Wall, Door
 
 
 class TestProekt(unittest.TestCase):
