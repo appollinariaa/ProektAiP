@@ -1,11 +1,15 @@
-import pygame
-pygame.init()
 from pygame import *
+import pygame
+
+pygame.init()
+
 FPS = 60
 SPEED_FACTOR = 10
 GAME_TIME_MS = 2 * 60 * 1000
 HIT_COOLDOWN_MS = 600
 START_X, START_Y = 15, 500
+
+
 class Proekt(sprite.Sprite):
     def __init__(self, x, y, speed, mg):
         """
@@ -32,6 +36,7 @@ class Proekt(sprite.Sprite):
         self.fy = float(y)
         self.rect.x = int(self.fx)
         self.rect.y = int(self.fy)
+
     def see(self):
         """
         Отрисовывает спрайт на главном окне ``window``.
@@ -41,7 +46,8 @@ class Proekt(sprite.Sprite):
         :returns: Ничего не возвращает.
         :rtype: None
         """
-        window.blit(self.image,(self.rect.x, self.rect.y))
+        window.blit(self.image, (self.rect.x, self.rect.y))
+
     def sync_rect(self):
         """
         Синхронизирует ``pygame.Rect`` (целые координаты) с float-координатами ``fx/fy``.
@@ -52,6 +58,8 @@ class Proekt(sprite.Sprite):
         """
         self.rect.x = int(round(self.fx))
         self.rect.y = int(round(self.fy))
+
+
 class Caracters(Proekt):
     def smena(self, dt):
         """
@@ -79,8 +87,11 @@ class Caracters(Proekt):
         if keys[K_DOWN] or keys[K_s]:
             self.fy += step
         self.sync_rect()
+
+
 class Eneny(Proekt):
     side = "left"
+
     def vrag_smena1(self, dt):
         """
         Движение врага №1: патрулирование по вертикали между заданными границами.
@@ -103,7 +114,9 @@ class Eneny(Proekt):
         else:
             self.fy += step
         self.sync_rect()
+
     side2 = "down"
+
     def vrag_smena2(self, dt):
         """
         Движение врага №2: патрулирование по горизонтали между заданными границами.
@@ -126,6 +139,7 @@ class Eneny(Proekt):
         else:
             self.fx += step
         self.sync_rect()
+
     def vrag_smena3(self, dt):
         """
         Движение врага №3: движение по маршруту (список точек) туда-обратно.
@@ -142,7 +156,8 @@ class Eneny(Proekt):
         :rtype: None
         """
         if not hasattr(self, "route"):
-            self.route = [(740, 345), (740, 95), (660, 95), (660, 160), (585, 160),(585, 95), (510, 95), (510, 15), (740, 15)]
+            self.route = [(740, 345), (740, 95), (660, 95), (660, 160), (585, 160), (585, 95), (510, 95), (510, 15),
+                          (740, 15)]
             self._route_i = 0
             self._route_dir = 1
             self.fx, self.fy = map(float, self.route[0])
@@ -167,6 +182,8 @@ class Eneny(Proekt):
         self.fx = x + dx / dist * move
         self.fy = y + dy / dist * move
         self.sync_rect()
+
+
 class Wall(sprite.Sprite):
     """
     Создаёт прямоугольную стену (препятствие) заданного размера и цвета.
@@ -186,7 +203,8 @@ class Wall(sprite.Sprite):
     :type g: int
     :param b: Синяя составляющая цвета (0..255).
     :type b: int
-    """ 
+    """
+
     def __init__(self, x, y, heig, wid, r, g, b):
         sprite.Sprite.__init__(self)
         self.r = r
@@ -206,7 +224,10 @@ class Wall(sprite.Sprite):
         :returns: Ничего не возвращает.
         :rtype: None
         """
-        draw.rect(window, (self.r, self.g, self.b), (self.rect.x, self.rect.y, self.width, self.height))
+        draw.rect(window, (self.r, self.g, self.b),
+                  (self.rect.x, self.rect.y, self.width, self.height))
+
+
 class Door(sprite.Sprite):
     """
     Создаёт прямоугольную "дверь" (зону выхода).
@@ -221,6 +242,7 @@ class Door(sprite.Sprite):
     :param wid: Ширина двери (в пикселях).
     :type wid: int
     """
+
     def __init__(self, x, y, heig, wid):
         sprite.Sprite.__init__(self)
         self.width = wid
@@ -228,6 +250,8 @@ class Door(sprite.Sprite):
         self.image = Surface([self.width, self.height])
         self.rect = self.image.get_rect()
         self.rect = Rect(x, y, self.width, self.height)
+
+
 window = display.set_mode((810, 800))
 display.set_caption("Лабиринт")
 background = image.load("static/фон1.jpg")
@@ -252,7 +276,7 @@ zvezda3 = Proekt(420, 400, 0, "static/zvezda.png")
 vrag1 = Eneny(92, 160, 15, "static/vrag.png")
 vrag2 = Eneny(20, 731, 15, "static/vrag.png")
 vrag3 = Eneny(740, 345, 15, "static/vrag.png")
-lage = Wall(0, 0, 800, 10, 100, 0,235 )
+lage = Wall(0, 0, 800, 10, 100, 0, 235)
 lage2 = Wall(0, 0, 10, 800, 100, 0, 235)
 lage3 = Wall(800, 0, 130, 10, 100, 0, 235)
 lage4 = Wall(800, 200, 600, 10, 100, 0, 235)
@@ -439,7 +463,8 @@ while run:
     sec = max(0, remaining // 1000)
     mm = sec // 60
     ss = sec % 60
-    timer_text = font_obj.render(f"Время: {mm:02d}:{ss:02d}", True, (255, 0, 0))
+    timer_text = font_obj.render(
+        f"Время: {mm:02d}:{ss:02d}", True, (255, 0, 0))
     window.blit(score_text, (10, 10))
     window.blit(lives_text, (10, 45))
     window.blit(timer_text, (10, 80))
