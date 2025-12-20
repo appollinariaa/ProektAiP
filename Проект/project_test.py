@@ -6,7 +6,7 @@ from main.py import Proekt, Caracters, Eneny, Wall, Door
 class TestProekt(unittest.TestCase):
     def setUp(self):
         pygame.init()
-        self.proekt = Proekt(10, 10, 5, "path/to/image.png")
+        self.proekt = Proekt(10, 10, 5, "static/image.png")
 
     def test_init(self):
         self.assertEqual(self.proekt.fx, 10)
@@ -33,7 +33,7 @@ class TestProekt(unittest.TestCase):
 class TestCaracters(unittest.TestCase):
     def setUp(self):
         pygame.init()
-        self.caracter = Caracters(15, 500, 15, "path/to/image.png")
+        self.caracter = Caracters(15, 500, 15, "static/image.png")
 
     def test_smena(self):
         dt = 1.0  
@@ -44,7 +44,7 @@ class TestCaracters(unittest.TestCase):
 class TestEneny(unittest.TestCase):
     def setUp(self):
         pygame.init()
-        self.enemy = Eneny(100, 100, 10, "path/to/image.png")
+        self.enemy = Eneny(100, 100, 10, "static/image.png")
 
     def test_vrag_smena1(self):
         dt = 1.0  
